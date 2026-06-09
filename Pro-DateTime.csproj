@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ProDateTime</RootNamespace>
+    <AssemblyName>Pro-DateTime</AssemblyName>
+    <PackageId>Pro-DateTime</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Vishal Rana</Authors>
+    <Description>A C# library that extends DateTime with overridable timezone conversion methods and strongly-typed timezone constants.</Description>
+    <PackageTags>datetime timezone conversion iana constants csharp dotnet</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryType>git</RepositoryType>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>
