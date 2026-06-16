@@ -30,6 +30,8 @@ public class ProDateTimeConverter : IDateTimeConverter
     //  IDateTimeConverter — explicit interface implementation
     // ──────────────────────────────────────────────────────────────────────────
 
+    // The interface members are implemented explicitly to keep the public API
+    // surface focused on the strongly-typed, overridable methods below.
     /// <inheritdoc/>
     DateTime IDateTimeConverter.Convert(DateTime dateTime, string targetTimezoneId)
         => ConvertToTimezone(dateTime, targetTimezoneId);
@@ -59,9 +61,11 @@ public class ProDateTimeConverter : IDateTimeConverter
     {
         ArgumentNullException.ThrowIfNull(targetTimezoneId, nameof(targetTimezoneId));
 
+        // Resolve the timezone once and use it for conversion.
         TimeZoneInfo tz = ResolveTimeZone(targetTimezoneId);
 
-        // Treat Unspecified as UTC so behaviour is deterministic
+        // Treat unspecified kinds as UTC so the conversion result is deterministic.
+        // This avoids ambiguous behaviour when the source value has no timezone context.
         DateTime utcSource = dateTime.Kind == DateTimeKind.Unspecified
             ? DateTime.SpecifyKind(dateTime, DateTimeKind.Utc)
             : dateTime;
@@ -85,6 +89,7 @@ public class ProDateTimeConverter : IDateTimeConverter
     {
         ArgumentNullException.ThrowIfNull(targetTimezoneId, nameof(targetTimezoneId));
 
+        // Convert the instant to the target timezone, preserving the exact point in time.
         TimeZoneInfo tz = ResolveTimeZone(targetTimezoneId);
         return TimeZoneInfo.ConvertTime(dateTimeOffset, tz);
     }
@@ -110,6 +115,7 @@ public class ProDateTimeConverter : IDateTimeConverter
     /// <returns>The <see cref="TimeSpan"/> UTC offset.</returns>
     public virtual TimeSpan GetUtcOffset(string timezoneId)
     {
+        // Use the current UTC instant to determine the active offset for the timezone.
         TimeZoneInfo tz = ResolveTimeZone(timezoneId);
         return tz.GetUtcOffset(DateTime.UtcNow);
     }
@@ -145,10 +151,12 @@ public class ProDateTimeConverter : IDateTimeConverter
     /// </exception>
     protected virtual TimeZoneInfo ResolveTimeZone(string timezoneId)
     {
-        // .NET 6+ on Windows: tries IANA first, falls back to Windows id.
+        // Attempt to resolve the timezone using the platform's available IDs.
+        // On .NET 6+ Windows, the runtime supports both IANA and Windows ids.
         if (TimeZoneInfo.TryFindSystemTimeZoneById(timezoneId, out TimeZoneInfo? tz))
             return tz;
 
+        // If resolution fails, surface a clear exception to callers.
         throw new TimeZoneNotFoundException(
             $"Timezone '{timezoneId}' was not found. " +
             $"Use a constant from {nameof(TimezoneConstant)} or supply a valid IANA / Windows id.");
